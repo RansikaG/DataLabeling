@@ -67,7 +67,7 @@ for root, dirs, files in os.walk(save_path, topdown=True):
     else:
         if len(files) > 3:
             folders_with_many_pics.append(root.split("\\")[-1])
-        # rmtree(train_save_path + '/' + folders[iteration])
+            rmtree(save_path + '/' + folders[iteration]) # removes folders with more than 3 pics
     iteration += 1
 
 
