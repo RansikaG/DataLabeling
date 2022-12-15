@@ -1,14 +1,20 @@
 import os
-import random
-from shutil import copyfile, rmtree
-from distutils.dir_util import copy_tree
+from shutil import rmtree
 from PIL import Image
+import cv2
 
 
 # Helper function to save image as grayscale
 def save_grayscale(source, destination):
-    img = Image.open(source).convert('L')
-    img.save(destination)
+    # Reading an image
+    image = cv2.imread(source, cv2.IMREAD_COLOR)
+    # Convert it to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    # Saving an image
+    val = cv2.imwrite(destination, gray)
+
+    # img = Image.open(source).convert('L')
+    # img.save(destination)
 
 
 # Checks the boat class from the labels and return the class as a string
@@ -20,8 +26,8 @@ def boat_class(txt_file_path):
 
 
 def clean_ID(name):
-    ID = name.split('_')[0]
-    return ID
+    id = name.split('_')[0]
+    return id
 
 
 # You only need to change this line to your dataset download path
@@ -56,20 +62,19 @@ if not os.path.isdir(save_path):
                 if not os.path.isdir(dst_path):
                     os.mkdir(dst_path)
                 save_grayscale(src_path, dst_path + '/' + name[:-3] + 'jpg')
-    # rmtree(train_save_path + '/' + 'USS-Bulkeley-DDG845')
 
 # making a list of ship folders with many ships
 iteration = -1
 folders_with_many_pics = []
+folders = ()
 for root, dirs, files in os.walk(save_path, topdown=True):
     if iteration == -1:
         folders = dirs
     else:
         if len(files) > 3:
             folders_with_many_pics.append(root.split("\\")[-1])
-            rmtree(save_path + '/' + folders[iteration]) # removes folders with more than 3 pics
+            rmtree(save_path + '/' + folders[iteration])  # removes folders with more than 3 pics
     iteration += 1
-
 
 with open('folder_names.txt', 'w') as f:
     for i, line in enumerate(folders_with_many_pics):
@@ -77,70 +82,3 @@ with open('folder_names.txt', 'w') as f:
             f.write(line + "\n")
         else:
             f.write(line)
-
-# folders_with_name = os.listdir(train_save_path)
-# for i, folder in enumerate(folders_with_name):
-#     folder_path = train_save_path + '/' + folder
-#     files = os.listdir(folder_path)
-#     # print(files)
-#     for cam, file in enumerate(files):
-#         os.rename(os.path.join(folder_path, file), os.path.join(folder_path, str(i).zfill(3)+ 'c'+str(cam))+'.png')
-#     os.rename(folder_path, os.path.join(train_save_path, str(i).zfill(3)))
-# # # ---------------------------------------
-# # gallery
-# gallery_save_path = download_path + '/pytorch/gallery'
-# gallery_size = int(len(folders_with_name)/2)
-#
-# if not os.path.isdir(gallery_save_path):
-#     os.mkdir(gallery_save_path)
-#
-#     image_folders = os.listdir(train_save_path)
-#     gallery_folder_names = random.sample(image_folders, gallery_size)
-#
-#     for gallery_folder in gallery_folder_names:
-#         copy_tree(train_save_path + '/' + gallery_folder, gallery_save_path + '/' + gallery_folder)
-#         rmtree(train_save_path + '/' + gallery_folder)
-#
-# # ---------------------------------------
-# # train_val
-# val_save_path = download_path + '/pytorch/val'
-# if not os.path.isdir(val_save_path):
-#     os.mkdir(val_save_path)
-#
-# folder_index = -1
-# folders = ()
-# for root, dirs, files in os.walk(train_save_path, topdown=True):
-#     if folder_index == -1:
-#         folders = dirs
-#     else:
-#         name = files[-1]
-#         dest_folder_name = folders[folder_index]
-#         src_path = train_save_path + '/' + dest_folder_name + '/' + name
-#         dst_path = val_save_path + '/' + dest_folder_name
-#         if not os.path.isdir(dst_path):
-#             os.mkdir(dst_path)
-#         copyfile(src_path, dst_path + '/' + name)
-#         os.remove(src_path)
-#     folder_index += 1
-#
-# # -----------------------------------------
-# # query
-# query_save_path = download_path + '/pytorch/query'
-# if not os.path.isdir(query_save_path):
-#     os.mkdir(query_save_path)
-#
-# folder_index = -1
-# folders = ()
-# for root, dirs, files in os.walk(gallery_save_path, topdown=True):
-#     if folder_index == -1:
-#         folders = dirs
-#     else:
-#         name = files[-1]
-#         dest_folder_name = folders[folder_index]
-#         src_path = gallery_save_path + '/' + dest_folder_name + '/' + name
-#         dst_path = query_save_path + '/' + dest_folder_name
-#         if not os.path.isdir(dst_path):
-#             os.mkdir(dst_path)
-#         copyfile(src_path, dst_path + '/' + name)
-#         os.remove(src_path)
-#     folder_index += 1
